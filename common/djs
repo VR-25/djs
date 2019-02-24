@@ -1,0 +1,103 @@
+#!/system/bin/sh
+# Daily Job Scheduler
+# Copyright (C) 2019, VR25 @ xda-developers
+# License: GPL V3+
+
+
+set -euo pipefail
+
+persistDir=/data/media/0/djs/dailyJobs
+tmpDir=/dev/djs
+currentJob=$tmpDir/${2-}${3-}
+
+current_time() { echo -n "$(( $(date +%H) * 60 * 60 + $(date +%M) * 60 ))"; }
+
+target_time() { echo -n "$(( $1 * 60 * 60 + $2 * 60 ))"; }
+
+list_schedules() {
+  echo
+  echo -n "Run "
+  [ $1 = $tmpDir ] && echo once || echo daily
+  for f in $1/*; do
+    if [ -f $f ]; then
+      echo
+      echo -n "  $f: " | sed "s:$1/::"
+      awk '{for (i=5; i<NF; i++) printf $i " "; if (NF >= 5) print $NF;}' $f | sed "s/^\'//;s/\'$//"
+    fi
+  done
+}
+
+# root check
+if ! ls /data/data 1>/dev/null 2>&1; then
+  echo
+  echo "(!) Must run as root (su)"
+  echo
+  exit 1
+fi
+
+mkdir -p $persistDir $tmpDir
+
+case ${1-} in
+  b*) # boot
+    set +euo pipefail
+    PATH=${0%/*}:$PATH
+    for f in $persistDir/*; do
+      [ -f $f ] && . $f
+    done
+  ;;
+  c*) # cancel
+    set +e
+    case $2 in
+      a*) rm $persistDir/$3 $tmpDir/$3;;
+      A*) rm -rf $persistDir $tmpDir;;
+      d*) rm $persistDir/$3;;
+      D*) rm -rf $persistDir;;
+      o*) rm $tmpDir/$3;;
+      O*) rm -rf $tmpDir;;
+    esac 2>/dev/null
+    set -e
+  ;;
+  d*|o*) # daily or once
+    (echo "djs $1 $2 $3 '$4'" > $currentJob
+    [[ $1 = d* ]] && cp -f $currentJob $persistDir/
+    chmod -R 0777 $persistDir
+
+    until [ $(current_time) -ge $(target_time $2 $3) ] || [ ! -f $currentJob ]; do
+      sleep $(( $(target_time $2 $3) - $(current_time) )) 2>/dev/null || :
+    done
+
+    shift 3
+    if [ -f $currentJob ] \
+      && { [ $(current_time) -ge $(target_time $2 $3) ] \
+        || [ $(current_time) -le $(( $(target_time $2 $3) + 5 * 60 )) ]; }
+    then
+      set +euo pipefail
+      eval "$@" >/dev/null 2>&1
+    fi &) &
+  ;;
+  i*) # info
+    case ${2-} in
+      d*)
+        echo
+        list_schedules $persistDir | grep -v '^Run ' | sed 's/^..//' | grep -v '^$'
+        echo
+      ;;
+      o*)
+        echo
+        list_schedules $tmpDir | grep -v '^Run ' | sed 's/^..//' | grep -v '^$'
+        echo
+      ;;
+      "")
+        list_schedules $tmpDir
+        list_schedules $persistDir
+        echo
+      ;;
+    esac
+  ;;
+  *) # help
+    echo
+    cat ${persistDir%/*}/info/README*
+    echo
+  ;;
+esac
+exit 0
