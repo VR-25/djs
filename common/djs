@@ -66,13 +66,13 @@ case ${1-} in
       sleep $(( $(target_time $2 $3) - $(current_time) )) 2>/dev/null || :
     done
 
-    shift 3
     if [ -f $currentJob ] \
       && { [ $(current_time) -ge $(target_time $2 $3) ] \
         || [ $(current_time) -le $(( $(target_time $2 $3) + 5 * 60 )) ]; }
     then
       set +euo pipefail
-      eval "$@" >/dev/null 2>&1
+      shift 3
+      eval "$@" 1>/dev/null 2>&1
     fi &) &
   ;;
   i*) # info

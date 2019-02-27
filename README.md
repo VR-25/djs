@@ -92,5 +92,8 @@ Missed schedules have a 5 minutes grace period.
 ---
 #### LATEST CHANGES
 
+**2019.2.27 (201902270)**
+- Fixed: parameters being shifted earlier than they should.
+
 **2019.2.24 (201902240)**
 - Initial release
