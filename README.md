@@ -1,24 +1,66 @@
 # Daily Job Scheduler (djs)
-## Copyright (C) 2019, VR25 @ xda-developers
-### License: GPL V3+
-#### README.md
 
 
 
 ---
-#### DISCLAIMER
+## LEGAL
 
-This software is provided as is, in the hope that it will be useful, but without any warranty. Always read/reread this reference prior to installing/upgrading.
-While no cats have been harmed, I assume no responsibility under anything which might go wrong due to the use/misuse of it.
+Copyright (C) 2017-2019 VR25 @ xda-developers
 
-A copy of the GNU General Public License, version 3 or newer ships with every build. Please, study it prior to using, modifying and/or sharing any part of this work.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-To prevent fraud, DO NOT mirror any link associated with this project; DO NOT share ready-to-flash-builds (zips) on-line!
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 
 ---
-#### DESCRIPTION
+## DISCLAIMER
+
+Always read/reread this reference prior to installing/upgrading this software.
+
+While no cats have been harmed, the author assumes no responsibility for anything that might break due to the use/misuse of it.
+
+To prevent fraud, do NOT mirror any link associated with this project; do NOT share builds (zips)! Share official links instead.
+
+
+
+---
+## DESCRIPTION
+
+`djs` is a scheduling utility for commands and scripts.
+
+
+
+---
+## PRE-REQUISITES
+
+- Magisk 17.0+
+- Terminal emulator running as root (su)
+
+
+
+---
+## SETUP
+
+- Install
+1. Flash live (e.g., from Magisk Manager) or from custom recovery (e.g., TWRP).
+
+- Uninstall
+1. Use Magisk Manager (app) or Magisk Manager for Recovery Mode (utility).
+
+
+
+---
+## USAGE
 
 
 *Syntax*
@@ -40,7 +82,7 @@ To prevent fraud, DO NOT mirror any link associated with this project; DO NOT sh
 
 Time must be in 24 hours format.
 
-For any of the arguments, except `["command(s)"]`, one can use only the first letter, e.g., `djs d 23 00 "am start -n android/com.android.internal.app.ShutdownActivity"` — shutdown the system at 23:00, daily.
+For any of the arguments, except `["command(s)"]`, one can use only the first letter, e.g., `djs d 23 00 "reboot -p"` — shutdown the system at 23:00, daily.
 
 A schedule name has the format `[hour][minute]` , e.g., /data/media/djs/`2230` (runs daily), /dev/djs/`1218` (runs once).
 
@@ -57,29 +99,7 @@ Missed schedules have a 5 minutes grace period.
 
 
 ---
-#### PRE-REQUISITES
-
-- Magisk 17.0+
-- Terminal emulator running as root (su)
-
-
-
----
-#### SETUP STEPS
-
-- Install
-1. Flash the zip in Magisk Manager or custom recovery.
-2. Reboot.
-
-- Uninstall
-1. Use Magisk Manager (app) or Magisk Manager for Recovery Mode (utility).
-2. Reboot.
-3. Remove `/data/media/0/djs/` (optional).
-
-
-
----
-#### LINKS
+## LINKS
 
 - [Donate](https://paypal.me/vr25xda/)
 - [Facebook page](https://facebook.com/VR25-at-xda-developers-258150974794782/)
@@ -90,7 +110,14 @@ Missed schedules have a 5 minutes grace period.
 
 
 ---
-#### LATEST CHANGES
+## LATEST CHANGES
+
+**2019.4.1 (201904010)**
+- Fixed `awk not found`.
+- Magisk 19 support
+- Major optimizations
+- Updated debugging and building tools
+- Updated documentation
 
 **2019.2.27 (201902270)**
 - Fixed: parameters being shifted earlier than they should.
