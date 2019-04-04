@@ -1,7 +1,7 @@
 id=djs
 name=Daily Job Scheduler (djs)
-version=2019.4.1
-versionCode=201904010
+version=2019.4.4
+versionCode=201904040
 author=VR25 @ xda-developers
-description=Scheduling utility for commands and scripts
+description=Scheduling utility for commands and scripts (supports Magisk 17-19)
 minMagisk=17000

@@ -133,7 +133,8 @@ unset -f print
 print_modname() {
   ui_print " "
   ui_print "$name $version"
-  ui_print "$author"
+  ui_print "Copyright (C) 2019, $author"
+  ui_print "License: GPLv3+"
   ui_print " "
 }
 
@@ -207,7 +208,7 @@ version_info() {
   # a note on untested Magisk versions
   if [ ${MAGISK_VER/.} -gt 181 ]; then
     ui_print " "
-    ui_print "  (i) NOTE: this Magisk version hasn't been tested by @VR25!"
+    ui_print "  (i) NOTE: this Magisk version hasn't been tested by $author!"
     ui_print "    - If you come across any issue, please report."
   fi
 

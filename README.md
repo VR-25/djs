@@ -5,7 +5,7 @@
 ---
 ## LEGAL
 
-Copyright (C) 2017-2019 VR25 @ xda-developers
+Copyright (C) 2019, VR25 @ xda-developers
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ To prevent fraud, do NOT mirror any link associated with this project; do NOT sh
 
 
 ---
-## PRE-REQUISITES
+## PREREQUISITES
 
-- Magisk 17.0+
+- Magisk 17-19
 - Terminal emulator running as root (su)
 
 
@@ -112,6 +112,9 @@ Missed schedules have a 5 minutes grace period.
 ---
 ## LATEST CHANGES
 
+**2019.4.4 (201904040)**
+- Updated information (copyright, module description and prerequisites)
+
 **2019.4.1 (201904010)**
 - Fixed `awk not found`.
 - Magisk 19 support
@@ -121,6 +124,3 @@ Missed schedules have a 5 minutes grace period.
 
 **2019.2.27 (201902270)**
 - Fixed: parameters being shifted earlier than they should.
-
-**2019.2.24 (201902240)**
-- Initial release
