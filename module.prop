@@ -1,7 +1,6 @@
 id=djs
 name=Daily Job Scheduler (djs)
-version=2019.4.4
-versionCode=201904040
-author=VR25 @ xda-developers
-description=Scheduling utility for commands and scripts (supports Magisk 17-19)
-minMagisk=17000
+version=2019.7.1
+versionCode=201907010
+author=VR25 (xda-developers.com)
+description=Runs commands and scripts on boot and at HH:MM. Any root solution is supported. A recent stable Magisk version is recommended. Refer to README.md for details. If you are in Magisk Manager > Downloads, click here to open the documentation.

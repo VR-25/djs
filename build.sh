@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Flashable zip builder
+# Flashable Zip Builder
 # Copyright (C) 2018-2019, VR25 @ xda-developers
 # License: GPLv3+
 
@@ -20,6 +20,12 @@ set_value versionCode $versionCode
 
 mkdir -p _builds
 
-zip -r9u _builds/$(get_value id)-$(get_value versionCode).zip \
+if [[ ${1:-x} != f ]]; then
+  echo "Downloading latest update-binary..."
+  curl -#L https://raw.githubusercontent.com/topjohnwu/Magisk/master/scripts/module_installer.sh > _builds/update-binary \
+    && mv -f _builds/update-binary META-INF/com/google/android/
+fi
+
+zip -r9uv _builds/$(get_value id)-$(get_value versionCode).zip \
   * .gitattributes .gitignore \
-  -x _*/* | grep .. && echo
+  -x _\*/\* | grep -iv 'zip warning:' | grep .. && echo

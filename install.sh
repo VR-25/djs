@@ -1,4 +1,4 @@
-##########################################################################################
+########################################################################################################
 #
 # Magisk Module Installer Script
 #
@@ -22,16 +22,16 @@
 # Set to true if you do *NOT* want Magisk to mount
 # any files for you. Most modules would NOT want
 # to set this flag to true
-SKIPMOUNT=false
+SKIPMOUNT=true
 
 # Set to true if you need to load system.prop
 PROPFILE=false
 
 # Set to true if you need post-fs-data script
-POSTFSDATA=true
+POSTFSDATA=false
 
 # Set to true if you need late_start service script
-LATESTARTSERVICE=true
+LATESTARTSERVICE=false
 
 ##########################################################################################
 # Replace list
@@ -119,21 +119,12 @@ REPLACE="
 # Enable boot scripts by setting the flags in the config section above.
 ##########################################################################################
 
-print() { grep_prop $1 $TMPDIR/module.prop; }
-
-author=$(print author)
-name=$(print name)
-version=$(print version)
-versionCode=$(print versionCode)
-
-unset -f print
-
 # Set what you want to display when installing your module
 
 print_modname() {
   ui_print " "
   ui_print "$name $version"
-  ui_print "Copyright (C) 2019, $author"
+  ui_print "Copyright (c) 2019, $author"
   ui_print "License: GPLv3+"
   ui_print " "
 }
@@ -146,29 +137,32 @@ on_install() {
   #ui_print "- Extracting module files"
   #unzip -o "$ZIPFILE" 'system/*' -d $MODPATH >&2
 
+  $BOOTMODE && pgrep -f "/${MODID}d.sh" | xargs kill -9 2>/dev/null
   set -euxo pipefail
   trap 'exxit $?' EXIT
 
-  modInfo=/data/media/0/$MODID/info
-
-  # create additional module paths
-  mkdir -p $modInfo
-  [ -d /system/xbin ] && mkdir -p $MODPATH/system/xbin \
-    || mkdir -p $MODPATH/system/bin
+  config=/data/media/0/$MODID/${MODID}.conf
+  local configVer=$(print versionCode $config)
 
   # extract module files
-  ui_print "- Extracting module files"
-  unzip -o "$ZIPFILE" -d $TMPDIR >&2
-  cd $TMPDIR
-  mv common/* $MODPATH/
-  $POSTFSDATA && cp -l $MODPATH/service.sh $MODPATH/post-fs-data.sh \
-    && POSTFSDATA=false || :
-  $LATESTARTSERVICE && LATESTARTSERVICE=false \
-    || rm $MODPATH/service.sh 2>/dev/null || :
-  mv $MODPATH/$MODID $MODPATH/system/*bin/
-  mv -f License* README* $modInfo/
+  ui_print " "
+  ui_print "(i) Extracting module files..."
+  unzip -o "$ZIPFILE" "$MODID/*" -d ${MODPATH%/*}/ >&2
+  ln $MODPATH/service.sh $MODPATH/post-fs-data.sh
+  mkdir -p ${config%/*}/info
+  unzip -o "$ZIPFILE" '*.md' -d ${config%/*}/info/ >&2
 
-  set +euxo pipefail  
+  # patch/upgrade config
+  if [ -f $config ]; then
+    if [ ${configVer:-0} -lt 201906290 ] \
+        || [ ${configVer:-0} -gt $(print versionCode $MODPATH/${MODID}.conf) ]
+      then
+        { rm $config || :
+        rm -rf ${config%/*}/dailyJobs || :; } 2>/dev/null
+    fi
+  fi
+
+  set +euxo pipefail
   version_info
 }
 
@@ -177,6 +171,7 @@ on_install() {
 # The default permissions should be good enough for most cases
 
 set_permissions() {
+  local file=""
   # The following is the default rule, DO NOT remove
   set_perm_recursive $MODPATH 0 0 0755 0644
 
@@ -187,35 +182,48 @@ set_permissions() {
   # set_perm  $MODPATH/system/lib/libart.so       0     0       0644
 
   # permissions for executables
-  for f in $MODPATH/bin/* $MODPATH/system/*bin/* $MODPATH/*.sh; do
-    [ -f "$f" ] && set_perm $f  0  0  0755
+  for file in $MODPATH/*.sh; do
+    [ -f $file ] && set_perm $file  0  0  0755
   done
+
+  # finishing touches
+  chmod -R 0777 ${config%/*}
+  $BOOTMODE && $MODPATH/service.sh --override
 }
 
 # You can add more functions to assist your custom script code
 
+cancel() {
+  imageless_magisk || unmount_magisk_image
+  abort "$1"
+}
+
+
 exxit() {
   set +euxo pipefail
-  [ $1 -ne 0 ] && abort
-  exit 0
+  [ $1 -ne 0 ] && cancel "$2"
+  exit $1
 }
 
 
 version_info() {
+
   local line=""
   local println=false
 
+  ui_print "- Done"
+
   # a note on untested Magisk versions
-  if [ ${MAGISK_VER/.} -gt 181 ]; then
+  if [ $MAGISK_VER_CODE -gt 19300 ]; then
     ui_print " "
-    ui_print "  (i) NOTE: this Magisk version hasn't been tested by $author!"
+    ui_print "  (i) Note: this Magisk version hasn't been tested by $author!"
     ui_print "    - If you come across any issue, please report."
   fi
 
   ui_print " "
   ui_print "  LATEST CHANGES"
   ui_print " "
-  cat $modInfo/README.md | while IFS= read -r line; do
+  cat ${config%/*}/info/README.md | while IFS= read -r line; do
     if $println; then
       line="$(echo "    $line")" && ui_print "$line"
     else
@@ -228,8 +236,21 @@ version_info() {
   ui_print "  LINKS"
   ui_print "    - Donate: paypal.me/vr25xda/"
   ui_print "    - Facebook page: facebook.com/VR25-at-xda-developers-258150974794782/"
-  ui_print "    - Git repository: github.com/Magisk-Modules-Repo/djs/"
+  ui_print "    - Git repository: github.com/VR-25/$MODID/"
   ui_print "    - Telegram channel: t.me/vr25_xda/"
   ui_print "    - Telegram profile: t.me/vr25xda/"
   ui_print " "
+
+  if $BOOTMODE; then
+    ui_print "(i) Ignore the reboot button."
+    ui_print "- $MODID daemon already started."
+    ui_print " "
+  fi
 }
+
+print() { sed -n "s|^$1=||p" ${2:-$TMPDIR/module.prop} 2>/dev/null || :; }
+
+author=$(print author)
+name=$(print name)
+version=$(print version)
+versionCode=$(print versionCode)
