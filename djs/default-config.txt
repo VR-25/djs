@@ -1,0 +1,17 @@
+// This is a comment line
+
+// This s used to determine whether config should be patched. Do NOT modify!
+versionCode=201908180
+
+// Schedule Examples
+
+// Run on boot
+// boot touch /data/I-was-born-on-boot; : --delete
+// ": --delete" is optional; it means "delete the line/schedule after execution".
+
+// Apply Advanced Charging Controller night settings at 22:00
+//2200 acc 45 44 && acc --set applyOnPlug usb/current_max:500000
+
+// Restore regular ACC settings at 6:00 (morning)
+//0600 acc 80 70 && acc -s applyOnPlug 2000000; : --boot
+// ": --boot" is optional; it lets this schedule run on boot as well (fail-safe).

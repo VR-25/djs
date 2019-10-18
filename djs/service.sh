@@ -1,30 +1,41 @@
 #!/system/bin/sh
-# Job Scheduler Daemon (djs) Initializer
+# Daily Job Scheduler Daemon (djsd) Initializer
 # Copyright (c) 2019, VR25 (xda-developers)
 # License: GPLv3+
 
+set +x
+id=djs
+umask 077
 
-(modId=$(sed -n 's/^id=//p' ${0%/*}/module.prop)
+# log
+mkdir -p /data/adb/${id}-data/logs
+exec > /data/adb/${id}-data/logs/init.log 2>&1
+set -x
+
+[ -f $PWD/${0##*/} ] && modPath=$PWD || modPath=${0%/*}
+. $modPath/busybox.sh
 
 # prepare working directory
-[ -d /sbin/.${modId} ] && [ ${1:-x} != --override ] && exit 0
+([ -d /sbin/.$id ] && [[ ${1:-x} != -*o* ]] && exit 0
 if ! mount -o remount,rw /sbin 2>/dev/null; then
   cp -a /sbin /dev/.sbin
   mount -o bind,rw /dev/.sbin /sbin
+  restorecon -R /sbin > /dev/null 2>&1
 fi
-mkdir -p /sbin/.${modId}
-[ -h /sbin/.${modId}/${modId} ] && rm /sbin/.${modId}/${modId} \
-  || rm -rf /sbin/.${modId}/${modId} 2>/dev/null
+mkdir -p /sbin/.$id
+[ -h /sbin/.$id/$id ] && rm /sbin/.$id/$id \
+  || rm -rf /sbin/.$id/$id 2>/dev/null
 [ ${MAGISK_VER_CODE:-18200} -gt 18100 ] \
-  && ln -s ${0%/*} /sbin/.${modId}/${modId} \
-  || cp -a ${0%/*} /sbin/.${modId}/${modId}
-ln -fs /sbin/.${modId}/${modId}/${modId}d-start.sh /sbin/${modId}d
-ln -fs /sbin/.${modId}/${modId}/${modId}d-status.sh /sbin/${modId}d,
-ln -fs /sbin/.${modId}/${modId}/${modId}d-stop.sh /sbin/${modId}d.
-ln -fs /sbin/.${modId}/${modId}/${modId}d-status.sh /sbin/${modId}d-status
-ln -fs /sbin/.${modId}/${modId}/${modId}d-stop.sh /sbin/${modId}d-stop
-ln -fs /sbin/.${modId}/${modId}/${modId}c.sh /sbin/${modId}c
-ln -fs /sbin/.${modId}/${modId}/${modId}c.sh /sbin/${modId}-config
+  && ln -s $modPath /sbin/.$id/$id \
+  || cp -a $modPath /sbin/.$id/$id
+ln -fs /sbin/.${id}/${id}/${id}d-start.sh /sbin/${id}d
+ln -fs /sbin/.${id}/${id}/${id}d-status.sh /sbin/${id}d,
+ln -fs /sbin/.${id}/${id}/${id}d-stop.sh /sbin/${id}d.
+ln -fs /sbin/.${id}/${id}/${id}d-status.sh /sbin/${id}d-status
+ln -fs /sbin/.${id}/${id}/${id}-version.sh /sbin/${id}-version
+ln -fs /sbin/.${id}/${id}/${id}d-stop.sh /sbin/${id}d-stop
+ln -fs /sbin/.${id}/${id}/${id}c.sh /sbin/${id}c
+ln -fs /sbin/.${id}/${id}/${id}c.sh /sbin/${id}-config
 
 # fix termux's PATH
 termuxSu=/data/data/com.termux/files/usr/bin/su
@@ -33,9 +44,8 @@ if [ -f $termuxSu ] && grep -q 'PATH=.*/sbin/su' $termuxSu; then
   cat $termuxSu.tmp > $termuxSu
   rm $termuxSu.tmp
 fi
-unset termuxSu
 
-# start ${modId}d
-${0%/*}/${modId}d.sh &) &
+# start ${id}d
+${0%/*}/${id}d.sh &) &
 
 exit 0
