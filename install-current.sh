@@ -107,7 +107,7 @@ EOF
 (pkill -9 -f "/$id (-|--)|/${id}d.sh" ) || :
 
 # install
-rm -rf $(readlink -f /sbin/.$id/$id) $installDir/$id 2>/dev/null || :
+rm -rf $(readlink -f /dev/.$id/$id) $installDir/$id 2>/dev/null || :
 cp -R $srcDir/$id/ $installDir/
 installDir=$installDir/$id
 [ ${installDir0:-x} == x ] && installDir0=/data/data/mattecarra.accapp/files/$id || installDir0=$installDir0/$id

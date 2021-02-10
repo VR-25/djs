@@ -265,6 +265,9 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 
 ---
 ## LATEST CHANGES
+**2021.02.10 (202102100)**
+- Quick and dirty hack to get djs running on Android 11
+
 
 **2019.10.18 (201910180)**
 - `: --boot` and `: --delete` flags

@@ -18,7 +18,7 @@ set -euo pipefail
 trap exxit EXIT
 config=/data/adb/djs-data/config.txt
 
-. /sbin/.djs/djs/busybox.sh
+. /dev/.djs/djs/busybox.sh
 
 if [ -f $config ]; then
 
@@ -67,7 +67,7 @@ CAT
   esac
 
 else
-  (/sbin/.djs/djs/djsd.sh &) &
+  (/dev/.djs/djs/djsd.sh &) &
   sleep 2
   $0 $@
 fi
