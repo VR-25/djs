@@ -1,3 +1,3 @@
 #!/system/bin/sh
-(/sbin/.djs/djs/djsd.sh &) &
+(/dev/.djs/djs/djsd.sh &) &
 exit 0

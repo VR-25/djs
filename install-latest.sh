@@ -53,7 +53,7 @@ get_ver() { sed -n 's/^versionCode=//p' ${1:-}; }
 
 reference="$(echo "$*" | sed -E 's/-c|--changelog|-f|--force|-n|--non-interactive|%.*%| //g')"
 tarball=https://github.com/VR-25/$id/archive/${reference:-master}.tar.gz
-instVer=$(get_ver /sbin/.$id/$id/module.prop 2>/dev/null || :)
+instVer=$(get_ver /dev/.$id/$id/module.prop 2>/dev/null || :)
 currVer=$(wget https://raw.githubusercontent.com/VR-25/$id/${reference:-master}/module.prop --output-document - | get_ver)
 
 [ -f $PWD/${0##*/} ] || cd ${0%/*}

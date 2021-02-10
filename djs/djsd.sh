@@ -8,11 +8,11 @@ exec > /dev/null 2>&1
 
 set -u
 IFS=$'\t\n'
-rootPath=/sbin/.djs
+rootPath=/dev/.djs
 config=/data/adb/djs-data/config.txt
 getv() { grep -E "$1" $config 2>/dev/null; }
 
-. /sbin/.djs/djs/busybox.sh
+. /dev/.djs/djs/busybox.sh
 
 pgrep -f /djsd.sh | sed s/$$// | xargs kill -9 2>/dev/null
 
