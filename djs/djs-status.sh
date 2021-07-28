@@ -1,3 +1,3 @@
 #!/system/bin/sh
-pgrep -f /djsd.sh
+pgrep -f /djs.sh
 exit $?

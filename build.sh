@@ -1,57 +1,139 @@
 #!/usr/bin/env sh
 # Installation Archives Builder
-# Copyright (c) 2018-2019, VR25 (xda-developers.com)
+# Copyright 2018-2020, VR25
 # License: GPLv3+
+#
+# usage: $0 [any_random_arg]
+#   e.g.,
+#     build.sh (builds $id and generates installable archives)
+#     build.sh any_random_arg (only builds $id)
+
 
 (cd ${0%/*} 2>/dev/null
 
-. check-syntax.sh || exit $?
+. ./check-syntax.sh || exit $?
 
-set_value() { sed -i -e "s/^($1=.*/($1=$2/" -e "s/^$1=.*/$1=$2/" ${3:-module.prop}; }
+
+set_prop() {
+  sed -i -e "s/^($1=.*/($1=$2/" -e "s/^$1=.*/$1=$2/" \
+    ${3:-module.prop} 2>/dev/null
+}
+
 
 id=$(sed -n "s/^id=//p" module.prop)
 
+domain=$(sed -n "s/^domain=//p" module.prop)
+
 version=$(grep '\*\*.*\(.*\)\*\*' README.md \
-  | head -n1 | sed 's/\*\*//; s/ .*//')
+  | tail -n 1 | sed 's/\*\*//; s/ .*//')
 
 versionCode=$(grep '\*\*.*\(.*\)\*\*' README.md \
-  | head -n1 | sed 's/\*\*//g; s/.* //' | tr -d ')' | tr -d '(')
+  | tail -n 1 | sed 's/\*\*//g; s/.* //' | tr -d ')' | tr -d '(')
 
-set_value version $version
-set_value versionCode $versionCode
+tmpDir=.tmp/META-INF/com/google/android
 
-# prepare files to be included in tarball
-rm -rf _builds/${id}-${versionCode}/ 2>/dev/null
-mkdir -p bin _builds/${id}-$versionCode/${id}-${versionCode}
-cp install-tarball.sh _builds/${id}-${versionCode}/
-cp -R ${id}/ install-c* *.md module.prop bin/ _builds/${id}-$versionCode/${id}-${versionCode} 2>&1 | grep -iv "can't preserve"
+
+# update module.prop
+grep -q "$versionCode" module.prop || {
+  set_prop version $version
+  set_prop versionCode $versionCode
+}
+
 
 # set ID
-for file in ./install-*.sh ./$id/*.sh ./bundle.sh \
-  ./uninstaller-src/META-INF/com/google/android/update-binary
-do
+for file in ./install*.sh ./$id/*.sh ./bundle.sh; do
   if [ -f "$file" ] && grep -Eq '(^|\()id=' $file; then
-    grep -Eq "(^|\()id=$id" $file || set_value id $id $file
+    grep -Eq "(^|\()id=$id" $file || set_prop id $id $file
   fi
 done
 
-# unify installers
-cp -u install-current.sh install.sh 2>/dev/null
-cp -u install-current.sh META-INF/com/google/android/update-binary 2>/dev/null
 
-# generate flashable zips
-echo "=> _builds/${id}-${versionCode}/${id}-${versionCode}.zip"
-rm bin/${id}-uninstaller.zip 2>/dev/null
-(cd uninstaller-src; zip -r9q ../bin/${id}-uninstaller.zip META-INF)
-zip -r9 _builds/${id}-${versionCode}/${id}-${versionCode}.zip \
-  * .gitattributes .gitignore \
-  -x _\*/\* | sed 's|^.*adding: ||' | grep -iv 'zip warning:'
-echo
+# set domain
+for file in ./install*.sh ./$id/*.sh ./bundle.sh; do
+  if [ -f "$file" ] && grep -Eq '(^|\()domain=' $file; then
+    grep -Eq "(^|\()domain=$domain" $file || set_prop domain $domain $file
+  fi
+done
 
-# generate tarball
-cd _builds/${id}-${versionCode}
-echo "=> _builds/${id}-${versionCode}/${id}-${versionCode}.tar.gz"
-tar -cvf - ${id}-${versionCode} | gzip -9 > ${id}-${versionCode}.tar.gz
-rm -rf ${id}-${versionCode}/
-echo
-exit 0)
+
+# update README
+
+if [ README.md -ot $id/default-config.txt ] \
+  || [ README.md -ot $id/strings.sh ]
+then
+# default config
+  set -e
+  { sed -n '1,/#DC#/p' README.md; echo; cat $id/default-config.txt; \
+    echo; sed -n '/^#\/DC#/,$p' README.md; } > README.md.tmp
+# terminal commands
+  { sed -n '1,/#TC#/p' README.md.tmp; \
+    echo; . ./$id/strings.sh; print_help; \
+    echo; sed -n '/^#\/TC#/,$p' README.md.tmp; } > README.md
+    rm README.md.tmp
+  set +e
+fi
+
+
+# update busybox config (from $id/setup-busybox.sh) in $id/uninstall.sh and install scripts
+set -e
+for file in ./$id/uninstall.sh ./install*.sh; do
+  [ $file -ot $id/setup-busybox.sh ] && {
+    { sed -n '1,/#BB#/p' $file; \
+    grep -Ev '^$|^#' $id/setup-busybox.sh; \
+    sed -n '/^#\/BB#/,$p' $file; } > ${file}.tmp
+    mv -f ${file}.tmp $file
+  }
+done
+set +e
+
+
+# unify installers for flashable zip (customize.sh and update-binary are copies of install.sh)
+{ cp -u install.sh customize.sh
+cp -u install.sh META-INF/com/google/android/update-binary; } 2>/dev/null
+
+
+if [ bin/${id}-uninstaller.zip -ot $id/uninstall.sh ] || [ ! -f bin/${id}-uninstaller.zip ]; then
+  # generate $id uninstaller flashable zip
+  echo "=> bin/${id}-uninstaller.zip"
+  rm -rf bin/${id}-uninstaller.zip $tmpDir 2>/dev/null
+  mkdir -p bin $tmpDir
+  cp $id/uninstall.sh $tmpDir/update-binary
+  echo "#MAGISK" > $tmpDir/updater-script
+  (cd .tmp
+  zip -r9 ../bin/${id}-uninstaller.zip * \
+    | sed 's|.*adding: ||' | grep -iv 'zip warning:')
+  rm -rf .tmp
+  echo
+fi
+
+
+[ -z "$1" ] && {
+
+  # cleanup
+  rm -rf _builds/${id}_${version}_\(${versionCode}\)/ 2>/dev/null
+  mkdir -p _builds/${id}_${version}_\(${versionCode}\)/${id}_${version}_\(${versionCode}\)
+
+  cp bin/${id}-uninstaller.zip _builds/${id}_${version}_\(${versionCode}\)/
+
+  # generate $id flashable zip
+  echo "=> _builds/${id}_${version}_(${versionCode})/${id}_${version}_(${versionCode}).zip"
+  zip -r9 _builds/${id}_${version}_\(${versionCode}\)/${id}_${version}_\(${versionCode}\).zip \
+    * .gitattributes .gitignore \
+    -x _\*/\* | sed 's|.*adding: ||' | grep -iv 'zip warning:'
+  echo
+
+  # prepare files to be included in $id installable tarball
+  cp install-tarball.sh _builds/${id}_${version}_\(${versionCode}\)/
+  cp -R ${id}/ install.sh *.md module.prop bin/ \
+    _builds/${id}_${version}_\(${versionCode}\)/${id}_${version}_\(${versionCode}\)/ 2>&1 \
+    | grep -iv "can't preserve"
+
+  # generate $id installable tarball
+  cd _builds/${id}_${version}_\(${versionCode}\)
+  echo "=> _builds/${id}_${version}_(${versionCode})/${id}_${version}_(${versionCode}).tar.gz"
+  tar -cvf - ${id}_${version}_\(${versionCode}\) | gzip -9 > ${id}_${version}_\(${versionCode}\).tar.gz
+  rm -rf ${id}_${version}_\(${versionCode}\)/
+  echo
+
+})
+exit 0

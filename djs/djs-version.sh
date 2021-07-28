@@ -1,5 +1,5 @@
 #!/system/bin/sh
 echo
-sed -n 's/^versionCode=//p' /sbin/.djs/djs/module.prop
+sed -n 's/^versionCode=//p' /data/adb/vr25/djs/module.prop
 echo
 exit 0

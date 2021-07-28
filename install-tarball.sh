@@ -1,88 +1,94 @@
 #!/system/bin/sh
-# ${1:-$id}*gz Installer
-# Copyright (c) 2019, VR25 (xda-developers.com)
+# ${1:-$id}[-_]*.tar.gz Installer
+# Copyright 2019-2020, VR25 (xda-developers.com)
 # License: GPLv3+
 
 id=djs
-umask 077
+domain=vr25
+umask 0077
+data_dir=/data/adb/$domain/${1:-$id}-data
 
 # log
-mkdir -p /data/adb/${1:-$id}-data/logs
-exec 2>/data/adb/${1:-$id}-data/logs/install-tarball.sh.log
+[ -z "${LINENO-}" ] || export PS4='$LINENO: '
+mkdir -p $data_dir/logs
+exec 2>$data_dir/logs/install-tarball.sh.log
 set -x
 
 # set up busybox
-if [ -d /sbin/.magisk/busybox ]; then
-  [[ $PATH == /sbin/.magisk/busybox* ]] || PATH=/sbin/.magisk/busybox:$PATH
-elif [ -d /sbin/.core/busybox ]; then
-  [[ $PATH == /sbin/.core/busybox* ]] || PATH=/sbin/.core/busybox:$PATH
-else
-  [[ $PATH == /dev/.busybox* ]] || PATH=/dev/.busybox:$PATH
-  if ! mkdir -m 700 /dev/.busybox 2>/dev/null; then
-    if [ -x /data/adb/magisk/busybox ]; then
-      /data/adb/magisk/busybox --install -s /dev/.busybox
-    elif which busybox > /dev/null; then
-      busybox --install -s /dev/.busybox
-    else
-      echo "(!) Install busybox binary first"
-      exit 3
-    fi
+#BB#
+[ -x /dev/.vr25/busybox/ls ] || {
+  mkdir -p /dev/.vr25/busybox
+  chmod 0700 /dev/.vr25/busybox
+  if [ -f /data/adb/vr25/bin/busybox ]; then
+    [ -x /data/adb/vr25/bin/busybox ] || chmod -R 0700 /data/adb/vr25/bin
+    /data/adb/vr25/bin/busybox --install -s /dev/.vr25/busybox
+  elif [ -f /data/adb/magisk/busybox ]; then
+    [ -x /data/adb/magisk/busybox ] || chmod 0700 /data/adb/magisk/busybox
+    /data/adb/magisk/busybox --install -s /dev/.vr25/busybox
+  elif which busybox > /dev/null; then
+    eval "$(which busybox) --install -s /dev/.vr25/busybox"
+  else
+    echo "(!) Install busybox or simply place it in /data/adb/vr25/bin/"
+    exit 3
   fi
-fi
+}
+case $PATH in
+  /data/adb/vr25/bin:*) :;;
+  *) export PATH=/data/adb/vr25/bin:/dev/.vr25/busybox:$PATH;;
+esac
+#/BB#
 
 # root check
-if [ $(id -u) -ne 0 ]; then
+[ $(id -u) -ne 0 ] && {
   echo "(!) $0 must run as root (su)"
   exit 4
-fi
+}
 
-umask 0
+umask 0000
 set -e
 
 # get into the target directory
-[ -f $PWD/${0##*/} ] || cd ${0%/*}
-cd $(readlink -f $PWD)
+[ -f $PWD/${0##*/} ] || cd $(readlink -f ${0%/*})
 
 # this runs on exit if the installer is launched by a front-end app
 copy_log() {
-  if [[ $PWD == /data/data/* ]]; then
+  rm -rf ${1-$id}[-_]*/ 2>/dev/null
+  [[ $PWD != /data/data/* ]] || {
     umask 077
     mkdir -p logs
 
-    cp -af /data/adb/${1:-$id}-data/logs/install.log logs/${1:-$id}-install.log
+    cp -af $data_dir/logs/install.log logs/${1:-$id}-install.log 2>/dev/null || return 0
 
     pkg=$(cd ..; pwd)
     pkg=${pkg##/data*/}
 
-    owner=$(grep $pkg /data/system/packages.list | awk '{print $2}')
+    owner=$(grep $pkg /data/system/packages.list | cut -d ' ' -f 2)
     chown -R $owner:$owner logs
-  fi
+  }
 }
 trap copy_log EXIT
 
 # extract tarball
-rm -rf ${1:-$id}-*/ 2>/dev/null
-tar -xf ${1:-$id}*gz
+rm -rf ${1:-$id}[-_]*/ 2>/dev/null
+tar -xf ${1:-$id}[-_]*.tar.gz
+
+# prevent AccA from downgrading/reinstalling modules ###
+case "$PWD" in
+  *mattecarra.accapp*)
+    get_ver() { sed -n '/^versionCode=/s/.*=//p' $1/module.prop 2>/dev/null || echo 0; }
+    bundled_ver=$(get_ver ${1:-$id}[-_]*)
+    regular_ver=$(get_ver /data/adb/$domain/$id)
+    if [ $bundled_ver -le $regular_ver ] && [ $regular_ver -ne 0 ]; then
+      ln -s $(readlink -f /data/adb/$domain/$id) .
+      (cd ./${1:-$id}/; ln -fs service.sh ${1:-$id}-init.sh)
+      exit 0
+    fi 2>/dev/null || :
+  ;;
+esac
 
 # install ${1:-$id}
-export installDir0="$2"
-sh ${1:-$id}-*/install-current.sh
-rm -rf ${1:-$id}-*/
-
-# set up alternate initializer (Magisk service.d)
-if [[ $PWD == /data/data/* ]] && [ -d /data/adb/service.d ]; then
-  cat << EOF > /data/adb/service.d/${1:-$id}-init.sh
-#!/system/bin/sh
-(until grep -q /storage/emulated /proc/mounts; do sleep 15; done
-if [ -f $PWD/${1:-$id}/${1:-$id}-init.sh ]; then
-  $PWD/${1:-$id}/${1:-$id}-init.sh
-else
-  rm \$0
-fi
-exit 0 &) &
-exit 0
-EOF
-  chmod 0700 /data/adb/service.d/${1:-$id}-init.sh
-fi
+test -f ${1:-$id}[-_]*/install.sh || i=-current #legacy
+export installDir="$2"
+/system/bin/sh ${1:-$id}[-_]*/install${i}.sh
 
 exit 0

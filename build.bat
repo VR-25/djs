@@ -1,2 +1,2 @@
 bash build.sh
-pause
+PAUSE

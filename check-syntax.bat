@@ -1,2 +1,2 @@
 bash check-syntax.sh
-pause
+PAUSE

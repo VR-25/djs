@@ -1,24 +1,20 @@
 #!/system/bin/sh
 # DJS Config Tool
-# Copyright (c) 2019, VR25 (xda-developers.com)
+# Copyright (C) 2019-2021, VR25
 # License: GPLv3+
 
 exxit() {
-  local exitCode=$?
+  exitCode=$?
   echo
-  # config backup
-  if [ -d /data/media/0/?ndroid ]; then
-    [ /data/media/0/.acc-config-backup.txt -nt $config ] \
-      || cp $config /data/media/0/.acc-config-backup.txt 2>/dev/null || :
-  fi
   exit $exitCode
 }
 
-set -euo pipefail
+set -eu
 trap exxit EXIT
-config=/data/adb/djs-data/config.txt
+execDir=/data/adb/vr25/djs
+config=${execDir}-data/config.txt
 
-. /sbin/.djs/djs/busybox.sh
+. $execDir/setup-busybox.sh
 
 if [ -f $config ]; then
 
@@ -67,7 +63,7 @@ CAT
   esac
 
 else
-  (/sbin/.djs/djs/djsd.sh &) &
+  $execDir/service.sh
   sleep 2
   $0 $@
 fi
