@@ -268,14 +268,6 @@ case $installDir in
   ;;
 esac
 
-
-#legacy
-if $acca; then
-  ln -s $installDir/service.sh $installDir/${id}-init.sh
-  ln -s $installDir $accaFiles/
-fi 2>/dev/null
-
-
 # initialize $id
 /data/adb/$domain/$id/service.sh
 

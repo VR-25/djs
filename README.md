@@ -123,8 +123,8 @@ Usage: djsc|djs-config OPTION ARGS
 Daemon Management
 
 Start/restart: djsd|djs-daemon
-Stop: djsd.|djsd-stop
-Status: djsd,|djsd-status
+Stop: djs.|djs-stop
+Status: djs,|djs-status
 
 
 Print Version Code (integer)
@@ -135,7 +135,7 @@ djs-version
 
 Notes
 - All commands return either 0 (success/running) or 1 (failure/stopped).
-- djsd-status prints the daemon's process ID (PID).
+- djs-status prints the daemon's process ID (PID).
 - Special shell characters (e.g., "|", ";", "&") must be quoted or escaped. For the sake of simplicity and consistency, single-quote all arguments as a whole (e.g., djsc -a '2200 reboot -p').
 ```
 
@@ -178,16 +178,7 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 ## LATEST CHANGES
 
 
-**2019.7.1 (201907010)**
-
-- Ability to run commands/scripts on boot
-- Enhanced efficiency and reliability
-- Major optimizations
-- More intuitive config and daemon management commands
-- Updated documentation
-
-
-**2019.10.18 (201910180)**
+**v2019.10.18 (201910180)**
 
 - `: --boot` and `: --delete` flags
 - Attribute back-end files ownership to front-end app
@@ -204,8 +195,13 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 - Workaround for front-end autostart blockage (Magisk service.d script)
 
 
-**2021.7.28 (202107280)**
+**v2021.7.28 (202107280)**
 
 - Fixed issues.
 - Major refactoring
 - Updated framework and documentation.
+
+
+**v2021.8.2 (202108020)**
+
+- Fixed AccA related issues.

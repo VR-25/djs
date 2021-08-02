@@ -1,6 +1,6 @@
 id=djs
 name=Daily Job Scheduler (DJS)
-version=2021.7.28
-versionCode=202107280
+version=2021.8.2
+versionCode=202108020
 author=VR25
 description=Runs commands and scripts on boot and at HH:MM. Any root solution is supported. The installation is always "system-less", whether or not the system is rooted with Magisk.
