@@ -58,6 +58,10 @@ Usage: djsc|djs-config OPTION ARGS
 
 -l|--list 'PATTERN' (default ".", meaning "all lines")
   e.g., djsc -l '^boot'
+
+Note: PATH starts with /data/adb/vr25/bin:/dev/.vr25/busybox.
+This means schedules don't require additional busybox setup.
+The first directory holds user executables.
 CAT
     ;;
   esac

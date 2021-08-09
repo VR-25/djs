@@ -137,6 +137,9 @@ Notes
 - All commands return either 0 (success/running) or 1 (failure/stopped).
 - djs-status prints the daemon's process ID (PID).
 - Special shell characters (e.g., "|", ";", "&") must be quoted or escaped. For the sake of simplicity and consistency, single-quote all arguments as a whole (e.g., djsc -a '2200 reboot -p').
+- PATH starts with /data/adb/vr25/bin:/dev/.vr25/busybox.
+This means schedules don't require additional busybox setup.
+The first directory holds user executables.
 ```
 
 ---
@@ -178,23 +181,6 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 ## LATEST CHANGES
 
 
-**v2019.10.18 (201910180)**
-
-- `: --boot` and `: --delete` flags
-- Attribute back-end files ownership to front-end app
-- Automatically copy installation log to <front-end app data>/files/logs/
-- Back-end can be upgraded from Magisk Manager, EX/FK Kernel Manager, and similar apps
-- `bundle.sh` - bundler for front-end app
--  `djs-version`: prints `versionCode` (integer)
-- Fixed schedule deletion and busybox handling issues
-- Flashable uninstaller: `/sdcard/djs-uninstaller.zip`
-- Major optimizations
-- Prioritize `nano -l` for text editing
-- Richer installation and initialization logs (/data/adb/djs-data/logs/)
-- Updated `build.sh` and documentation
-- Workaround for front-end autostart blockage (Magisk service.d script)
-
-
 **v2021.7.28 (202107280)**
 
 - Fixed issues.
@@ -205,3 +191,9 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 **v2021.8.2 (202108020)**
 
 - Fixed AccA related issues.
+
+
+**v2021.8.9.1 (202108091)**
+
+- Rewritten daemon logic for better efficiency and reliability.
+- Updated documentation

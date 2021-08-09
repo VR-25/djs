@@ -7,7 +7,6 @@
 exec > /dev/null 2>&1
 
 set -u
-IFS=$(printf '\t\n')
 tmpDir=/dev/.vr25/djs
 execDir=/data/adb/vr25/djs
 config=${execDir}-data/config.txt
@@ -72,27 +71,30 @@ ln -sf $execDir/djs-version.sh /dev/djs-version
 
 
 # boot schedules
-for schedule in $(getv '^boot | : --boot'); do
-  if ! grep -q "$schedule" $tmpDir/boot 2>/dev/null; then
-    echo "$schedule" >> $tmpDir/boot
-    (unset IFS; set +u; eval "$(echo "$schedule" | sed 's#^.... ##')" &) &
-  fi
-done
+if [ ! -f $tmpDir/boot.sh ]; then
+  echo "#!/system/bin/sh" > $tmpDir/boot.sh
+  grep '^boot | : --boot' $config | sed 's/^.... //' >> $tmpDir/boot.sh
+  echo 'exit $?' >> $tmpDir/boot.sh
+  chmod u+x $tmpDir/boot.sh
+  start-stop-daemon -bx $tmpDir/boot.sh -S --
+  grep -q '^boot .* : --delete' $config && sed -i '/^boot .* : --delete/d' $config
+fi
 
+# HH:MM schedules
 while :; do
-  # HH:MM schedules
-  for schedule in $(getv '^[0-2].[0-5][0-9]'); do
-    if [ $(date +%H%M) -eq $(echo "$schedule" | grep -o '^.... ') ]; then
-      if ! grep -q "$schedule" $tmpDir/HH:MM 2>/dev/null; then
-        echo "$schedule" >> $tmpDir/HH:MM
-        (unset IFS; set +u; eval "$(echo "$schedule" | sed 's#^.... ##')" &) &
-        (sleep 60; sed -i "\#$schedule#d" $tmpDir/HH:MM &) &
-        echo "$schedule" | grep -q ' : --delete' && sed -i "\#$schedule#d" $config
-        sleep 1
-      fi
-    fi
+  time=$(date +%H%M)
+  echo "#!/system/bin/sh" > $tmpDir/${time}.sh
+  if grep "^$time " $config | sed 's/^.... //' >> $tmpDir/${time}.sh; then
+    echo 'rm $0' >> $tmpDir/${time}.sh
+    echo 'exit $?' >> $tmpDir/${time}.sh
+    chmod u+x $tmpDir/${time}.sh
+    grep -q ' : --delete' $tmpDir/${time}.sh && sed -i "/^$time .* : --delete/d" $config
+    start-stop-daemon -bx $tmpDir/${time}.sh -S --
+  fi
+  sleep 40
+  while [ $(date +%H%M) -eq $time ]; do
+    sleep 10
   done
-  sleep 20
 done
 
 exit $?
