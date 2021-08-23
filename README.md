@@ -1,6 +1,22 @@
 # Daily Job Scheduler (DJS)
 
 
+
+- [DESCRIPTION](#description)
+- [LEGAL](#legal)
+- [DISCLAIMER](#disclaimer)
+- [WARNING](#warning)
+- [DONATIONS](#donations)
+- [PREREQUISITES](#prerequisites)
+- [CONFIGURATION (/data/adb/vr25/djs-data/config.txt)](#configuration-dataadbvr25djs-dataconfigtxt)
+- [USAGE](#usage)
+  - [Terminal Commands](#terminal-commands)
+- [NOTES/TIPS FOR FRONT-END DEVELOPERS](#notestips-for-front-end-developers)
+- [FREQUENTLY ASKED QUESTIONS (FAQ)](#frequently-asked-questions-faq)
+- [LINKS](#links)
+- [LATEST CHANGES](#latest-changes)
+
+
 ---
 ## DESCRIPTION
 
@@ -48,7 +64,7 @@ By choosing to use/misuse it, you agree to do so at your own risk!
 ---
 ## DONATIONS
 
-Please, support the project with donations (`## LINKS` at the bottom).
+Please, support the project with donations ([links](#links) at the bottom).
 As the project gets bigger and more popular, the need for coffee goes up as well.
 
 
@@ -70,7 +86,7 @@ Other executables or static binaries can also be placed in /data/adb/vr25/bin/ (
 
 
 ---
-## CONFIGURATION (/data/adb/djs-data/config.txt)
+## CONFIGURATION (/data/adb/vr25/djs-data/config.txt)
 
 ```
 // This is a comment line
@@ -96,7 +112,7 @@ versionCode=201908180
 ## USAGE
 
 
-If you feel uncomfortable with the command line, use a `text editor` to modify `/data/adb/djs-data/config.txt`.
+If you feel uncomfortable with the command line, use a `text editor` to modify `/data/adb/vr25/djs-data/config.txt`.
 Changes to this file take effect almost instantly, and without a [daemon](https://en.wikipedia.org/wiki/Daemon_(computing)) restart.
 
 
@@ -110,14 +126,17 @@ Usage: djsc|djs-config OPTION ARGS
 -a|--append 'LINE'
   e.g., djsc -a 2200 reboot -p
 
--d|--delete 'PATTERN' (all matching lines)
+-d|--delete ['regex'] (deletes all matching lines)
   e.g., djsc --delete 2200
 
--e|--edit EDITOR OPTS (fallback: nano -l|vim|vi)
+-e|--edit [cmd] (fallback cmd: nano -l|vim|vi)
   e.g., djs-config --edit vim
 
--l|--list 'PATTERN' (default ".", meaning "all lines")
+-l|--list ['regex'] (fallback regex: ".", matches all lines)
   e.g., djsc -l '^boot'
+
+-L|--log [cmd] (fallback cmd: tail -F)
+  e.g., djsc -L cat > /sdcard/djsd.log
 
 
 Daemon Management
@@ -165,6 +184,11 @@ Explain settings/concepts as clearly and with as few words as possible.
 Open issues on GitHub or contact the developer on Telegram/XDA (linked below). Always provide as much information as possible.
 
 
+> Where do I find daemon logs?
+
+`/dev/.vr25/djs/djsd.log`
+
+
 ---
 ## LINKS
 
@@ -181,13 +205,6 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 ## LATEST CHANGES
 
 
-**v2021.7.28 (202107280)**
-
-- Fixed issues.
-- Major refactoring
-- Updated framework and documentation.
-
-
 **v2021.8.2 (202108020)**
 
 - Fixed AccA related issues.
@@ -197,3 +214,11 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 
 - Rewritten daemon logic for better efficiency and reliability.
 - Updated documentation
+
+
+**v2021.8.23 (202108230)**
+
+- -L|--log [cmd] (default cmd: tail -F), djsd generates verbose (/dev/.vr25/djs/djsd.log).
+- General fixes
+- Major optimizations
+- Updated documentation: now with a table of contents and available in HTML format.

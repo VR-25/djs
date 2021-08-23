@@ -40,6 +40,18 @@ if [ -f $config ]; then
       echo
       grep -E "${*:-.}" $config | grep -v '^$'
     ;;
+
+    -L|--log)
+      shift
+      echo
+      log=/dev/.vr25/djs/djsd.log
+      if [ -z "${1-}" ]; then
+        tail -F $log
+      else
+        eval "$@ $log"
+      fi
+      echo
+    ;;
     *)
       cat << CAT
 
@@ -50,14 +62,17 @@ Usage: djsc|djs-config OPTION ARGS
 -a|--append 'LINE'
   e.g., djsc -a 2200 reboot -p
 
--d|--delete 'PATTERN' (all matching lines)
+-d|--delete ['regex'] (deletes all matching lines)
   e.g., djsc --delete 2200
 
--e|--edit EDITOR OPTS (fallback: nano -l|vim|vi)
+-e|--edit [cmd] (fallback cmd: nano -l|vim|vi)
   e.g., djs-config --edit vim
 
--l|--list 'PATTERN' (default ".", meaning "all lines")
+-l|--list ['regex'] (fallback regex: ".", matches "all lines")
   e.g., djsc -l '^boot'
+
+-L|--log [cmd] (fallback cmd: tail -F)
+  e.g., djsc -L cat > /sdcard/djsd.log
 
 Note: PATH starts with /data/adb/vr25/bin:/dev/.vr25/busybox.
 This means schedules don't require additional busybox setup.

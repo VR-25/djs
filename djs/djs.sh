@@ -3,14 +3,18 @@
 # Copyright (C) 2019-2021, VR25
 # License: GPLv3+
 
-
-exec > /dev/null 2>&1
-
-set -u
 tmpDir=/dev/.vr25/djs
+log=$tmpDir/djsd.log
 execDir=/data/adb/vr25/djs
 config=${execDir}-data/config.txt
 getv() { grep -E "$1" $config 2>/dev/null; }
+
+# verbose
+[ -z "$LINENO" ] || export PS4='$LINENO: '
+echo "###$(date)###" >> $log
+echo "versionCode=$(sed -n s/versionCode=//p $execDir/module.prop 2>/dev/null)" >> $log
+exec >> $log 2>&1
+set -x
 
 [ -f $execDir/disable ] && exit 0
 . $execDir/setup-busybox.sh
@@ -19,7 +23,7 @@ mkdir -p $tmpDir
 
 if [ ! -f $config ]; then
   mkdir -p ${config%/*}
-  cp $execDir/default-config.txt $config
+  cat $execDir/default-config.txt > $config
 fi
 
 
@@ -71,30 +75,30 @@ ln -sf $execDir/djs-version.sh /dev/djs-version
 
 
 # boot schedules
-if [ ! -f $tmpDir/boot.sh ]; then
-  echo "#!/system/bin/sh" > $tmpDir/boot.sh
-  grep '^boot | : --boot' $config | sed 's/^.... //' >> $tmpDir/boot.sh
-  echo 'exit $?' >> $tmpDir/boot.sh
-  chmod u+x $tmpDir/boot.sh
-  start-stop-daemon -bx $tmpDir/boot.sh -S --
+if [ ! -f $tmpDir/djsd-boot.sh ]; then
+  echo "#!/system/bin/sh" > $tmpDir/djsd-boot.sh
+  grep '^boot | : --boot' $config | sed 's/^.... //' >> $tmpDir/djsd-boot.sh
+  echo 'exit $?' >> $tmpDir/djsd-boot.sh
+  chmod u+x $tmpDir/djsd-boot.sh
+  start-stop-daemon -bx $tmpDir/djsd-boot.sh -S --
   grep -q '^boot .* : --delete' $config && sed -i '/^boot .* : --delete/d' $config
 fi
 
 # HH:MM schedules
 while :; do
   time=$(date +%H%M)
-  echo "#!/system/bin/sh" > $tmpDir/${time}.sh
-  if grep "^$time " $config | sed 's/^.... //' >> $tmpDir/${time}.sh; then
-    echo 'rm $0' >> $tmpDir/${time}.sh
-    echo 'exit $?' >> $tmpDir/${time}.sh
-    chmod u+x $tmpDir/${time}.sh
-    grep -q ' : --delete' $tmpDir/${time}.sh && sed -i "/^$time .* : --delete/d" $config
-    start-stop-daemon -bx $tmpDir/${time}.sh -S --
+  script=$tmpDir/djsd-${time}.sh
+  if [ ! -f $script ] && grep -q "^$time " $config; then
+    sed -n "s|^$time |#!/system/bin/sh\n|p" $config > $script
+    echo 'rm $0; exit $?' >> $script
+    chmod u+x $script
+    grep -q ' : --delete' $script && sed -i "/^$time .* : --delete/d" $config
+    start-stop-daemon -bx $script -S --
   fi
-  sleep 40
   while [ $(date +%H%M) -eq $time ]; do
-    sleep 10
+    sleep 20
   done
+  [ $(du -k $log | cut -f1) -ge 8 ] && : > $log
 done
 
 exit $?

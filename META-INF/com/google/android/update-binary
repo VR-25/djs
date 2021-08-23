@@ -263,7 +263,9 @@ echo "
 
 
 case $installDir in
-  /data/adb/*) echo "
+  /data/adb/modules*)
+  ;;
+  *) echo "
 (i) Non-Magisk users can enable $id auto-start by running /data/adb/$domain/$id/service.sh, a copy of, or a link to it - with init.d or an app that emulates it."
   ;;
 esac
