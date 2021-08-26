@@ -10,6 +10,7 @@ config=${execDir}-data/config.txt
 getv() { grep -E "$1" $config 2>/dev/null; }
 
 # verbose
+mkdir -p $tmpDir
 [ -z "$LINENO" ] || export PS4='$LINENO: '
 echo "###$(date)###" >> $log
 echo "versionCode=$(sed -n s/versionCode=//p $execDir/module.prop 2>/dev/null)" >> $log
@@ -19,7 +20,6 @@ set -x
 [ -f $execDir/disable ] && exit 0
 . $execDir/setup-busybox.sh
 pgrep -f /djs.sh | sed s/$$// | xargs kill -9 2>/dev/null
-mkdir -p $tmpDir
 
 if [ ! -f $config ]; then
   mkdir -p ${config%/*}

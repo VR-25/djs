@@ -3,7 +3,7 @@
 
 
 - [DESCRIPTION](#description)
-- [LEGAL](#legal)
+- [LICENSE](#license)
 - [DISCLAIMER](#disclaimer)
 - [WARNING](#warning)
 - [DONATIONS](#donations)
@@ -12,6 +12,8 @@
 - [USAGE](#usage)
   - [Terminal Commands](#terminal-commands)
 - [NOTES/TIPS FOR FRONT-END DEVELOPERS](#notestips-for-front-end-developers)
+  - [Basics](#basics)
+  - [Initializing DJS](#initializing-djs)
 - [FREQUENTLY ASKED QUESTIONS (FAQ)](#frequently-asked-questions-faq)
 - [LINKS](#links)
 - [LATEST CHANGES](#latest-changes)
@@ -26,7 +28,7 @@ The installation is always "systemless", whether or not the system is rooted wit
 
 
 ---
-## LEGAL
+## LICENSE
 
 Copyright (C) 2019-2021, VR25
 
@@ -41,7 +43,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 ---
@@ -164,8 +166,14 @@ The first directory holds user executables.
 ---
 ## NOTES/TIPS FOR FRONT-END DEVELOPERS
 
+
+### Basics
+
+DJS does not require Magisk.
+Any root solution is fine.
+
 Use `/dev/.vr25/djs/*` over regular commands.
-These are guaranteed to be readily available after installation/initialization.
+These are guaranteed to be readily available after installation/upgrades.
 
 It may be best to use long options over short equivalents - e.g., `/dev/.vr25/djs/djs-config --list`, instead of `/dev/.vr25/djs/djsc -l`.
 This makes code more readable (less cryptic).
@@ -175,13 +183,42 @@ Provide additional information (trusted) where appropriate.
 Explain settings/concepts as clearly and with as few words as possible.
 
 
+### Initializing DJS
+
+DJS is automatically initialized after installation/upgrades.
+It needs to be initialized on boot, too.
+If it's installed as a Magisk module, this is done by Magisk itself.
+Otherwise, the front-end should handle it as follows:
+```
+on boot_completed receiver and main activity
+  if file /dev/.acca/started does NOT exist
+    create it
+      mkdir -p /dev/.acca
+      touch /dev/.acca/started
+    if accd is NOT running
+      launch it
+        /data/adb/vr25/djs/service.sh
+    else
+      do nothing
+  else
+    do nothing
+```
+`/dev/` is volatile - meaning, a reboot/shutdown clears `/dev/.acca/` and its contents.
+That's exactly what we want.
+Of course, `/dev/.acca/started` is just an example.
+One can use any random path (e.g., `.myapp/initialized`), as long as it's under `/dev/` and does not conflict with preexisting data.
+**WARNING**: do not play with preexisting /dev/ data!
+Doing so may result in data loss and/or other undesired outcome.
+
+
 ---
 ## FREQUENTLY ASKED QUESTIONS (FAQ)
 
 
 > How do I report issues?
 
-Open issues on GitHub or contact the developer on Telegram/XDA (linked below). Always provide as much information as possible.
+Open issues on GitHub or contact the developer on Telegram/XDA (linked below).
+Always provide as much information as possible.
 
 
 > Where do I find daemon logs?
@@ -205,11 +242,6 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 ## LATEST CHANGES
 
 
-**v2021.8.2 (202108020)**
-
-- Fixed AccA related issues.
-
-
 **v2021.8.9.1 (202108091)**
 
 - Rewritten daemon logic for better efficiency and reliability.
@@ -222,3 +254,9 @@ Open issues on GitHub or contact the developer on Telegram/XDA (linked below). A
 - General fixes
 - Major optimizations
 - Updated documentation: now with a table of contents and available in HTML format.
+
+
+**v2021.8.26 (202108260)**
+
+- Fixed daemon startup issue.
+- Updated framework (it uses acc's) and documentation

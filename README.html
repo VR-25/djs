@@ -38,7 +38,7 @@
         <h1 id="daily-job-scheduler-djs">Daily Job Scheduler (DJS)</h1>
 <ul>
 <li><a href="#description">DESCRIPTION</a></li>
-<li><a href="#legal">LEGAL</a></li>
+<li><a href="#license">LICENSE</a></li>
 <li><a href="#disclaimer">DISCLAIMER</a></li>
 <li><a href="#warning">WARNING</a></li>
 <li><a href="#donations">DONATIONS</a></li>
@@ -49,7 +49,12 @@
 <li><a href="#terminal-commands">Terminal Commands</a></li>
 </ul>
 </li>
-<li><a href="#notestips-for-front-end-developers">NOTES/TIPS FOR FRONT-END DEVELOPERS</a></li>
+<li><a href="#notestips-for-front-end-developers">NOTES/TIPS FOR FRONT-END DEVELOPERS</a>
+<ul>
+<li><a href="#basics">Basics</a></li>
+<li><a href="#initializing-djs">Initializing DJS</a></li>
+</ul>
+</li>
 <li><a href="#frequently-asked-questions-faq">FREQUENTLY ASKED QUESTIONS (FAQ)</a></li>
 <li><a href="#links">LINKS</a></li>
 <li><a href="#latest-changes">LATEST CHANGES</a></li>
@@ -60,7 +65,7 @@
 Any root solution is supported.
 The installation is always &quot;systemless&quot;, whether or not the system is rooted with Magisk.</p>
 <hr>
-<h2 id="legal">LEGAL</h2>
+<h2 id="license">LICENSE</h2>
 <p>Copyright (C) 2019-2021, VR25</p>
 <p>This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -71,7 +76,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.</p>
 <p>You should have received a copy of the GNU General Public License
-along with this program.  If not, see <a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>.</p>
+along with this program. If not, see <a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>.</p>
 <hr>
 <h2 id="disclaimer">DISCLAIMER</h2>
 <p>Always read/reread this reference prior to installing/upgrading this software.</p>
@@ -167,19 +172,47 @@ The first directory holds user executables.
 </div></code></code></pre>
 <hr>
 <h2 id="notestips-for-front-end-developers">NOTES/TIPS FOR FRONT-END DEVELOPERS</h2>
+<h3 id="basics">Basics</h3>
+<p>DJS does not require Magisk.
+Any root solution is fine.</p>
 <p>Use <code>/dev/.vr25/djs/*</code> over regular commands.
-These are guaranteed to be readily available after installation/initialization.</p>
+These are guaranteed to be readily available after installation/upgrades.</p>
 <p>It may be best to use long options over short equivalents - e.g., <code>/dev/.vr25/djs/djs-config --list</code>, instead of <code>/dev/.vr25/djs/djsc -l</code>.
 This makes code more readable (less cryptic).</p>
 <p>Include provided descriptions of DJS features/settings in your app(s).
 Provide additional information (trusted) where appropriate.
 Explain settings/concepts as clearly and with as few words as possible.</p>
+<h3 id="initializing-djs">Initializing DJS</h3>
+<p>DJS is automatically initialized after installation/upgrades.
+It needs to be initialized on boot, too.
+If it's installed as a Magisk module, this is done by Magisk itself.
+Otherwise, the front-end should handle it as follows:</p>
+<pre><code><code><div>on boot_completed receiver and main activity
+  if file /dev/.acca/started does NOT exist
+    create it
+      mkdir -p /dev/.acca
+      touch /dev/.acca/started
+    if accd is NOT running
+      launch it
+        /data/adb/vr25/djs/service.sh
+    else
+      do nothing
+  else
+    do nothing
+</div></code></code></pre>
+<p><code>/dev/</code> is volatile - meaning, a reboot/shutdown clears <code>/dev/.acca/</code> and its contents.
+That's exactly what we want.
+Of course, <code>/dev/.acca/started</code> is just an example.
+One can use any random path (e.g., <code>.myapp/initialized</code>), as long as it's under <code>/dev/</code> and does not conflict with preexisting data.
+<strong>WARNING</strong>: do not play with preexisting /dev/ data!
+Doing so may result in data loss and/or other undesired outcome.</p>
 <hr>
 <h2 id="frequently-asked-questions-faq">FREQUENTLY ASKED QUESTIONS (FAQ)</h2>
 <blockquote>
 <p>How do I report issues?</p>
 </blockquote>
-<p>Open issues on GitHub or contact the developer on Telegram/XDA (linked below). Always provide as much information as possible.</p>
+<p>Open issues on GitHub or contact the developer on Telegram/XDA (linked below).
+Always provide as much information as possible.</p>
 <blockquote>
 <p>Where do I find daemon logs?</p>
 </blockquote>
@@ -197,10 +230,6 @@ Explain settings/concepts as clearly and with as few words as possible.</p>
 </ul>
 <hr>
 <h2 id="latest-changes">LATEST CHANGES</h2>
-<p><strong>v2021.8.2 (202108020)</strong></p>
-<ul>
-<li>Fixed AccA related issues.</li>
-</ul>
 <p><strong>v2021.8.9.1 (202108091)</strong></p>
 <ul>
 <li>Rewritten daemon logic for better efficiency and reliability.</li>
@@ -212,6 +241,11 @@ Explain settings/concepts as clearly and with as few words as possible.</p>
 <li>General fixes</li>
 <li>Major optimizations</li>
 <li>Updated documentation: now with a table of contents and available in HTML format.</li>
+</ul>
+<p><strong>v2021.8.26 (202108260)</strong></p>
+<ul>
+<li>Fixed daemon startup issue.</li>
+<li>Updated framework (it uses acc's) and documentation</li>
 </ul>
 
     </body>
