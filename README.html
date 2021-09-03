@@ -106,23 +106,24 @@ Precedence: /data/adb/vr25/bin/busybox &gt; Magisk's busybox &gt; system's busyb
 <p>Other executables or static binaries can also be placed in /data/adb/vr25/bin/ (with proper permissions) instead of being installed system-wide.</p>
 <hr>
 <h2 id="configuration-dataadbvr25djs-dataconfigtxt">CONFIGURATION (/data/adb/vr25/djs-data/config.txt)</h2>
-<pre><code><code><div>// This is a comment line
+<pre><code><code><div># This is a comment line.
+# All lines that do not match a schedule instruction are ignored, regardless of the '#'.
 
-// This is used to determine whether config should be patched. Do NOT modify!
+# This is used to determine whether this file should be patched. Do NOT modify!
 versionCode=201908180
 
-// Schedule Examples
+# Schedule Examples
 
-// Run on boot
-// boot touch /data/I-was-born-on-boot; : --delete
-// &quot;: --delete&quot; is optional; it means &quot;delete the schedule after execution&quot; - effectively turning it into a one-time boot schedule.
+# Run on boot
+#boot touch /data/I-was-born-on-boot; : --delete
+# &quot;: --delete&quot; is optional; it means &quot;delete the schedule after execution&quot; - effectively turning it into a one-time boot schedule.
 
-// Apply Advanced Charging Controller night settings at 22:00
-//2200 acc 45 44 &amp;&amp; acc --set applyOnPlug usb/current_max:500000
+# Apply Advanced Charging Controller night settings at 22:00
+#2200 acc pc=45 rc=44 mcc=500000 mcv=3920
 
-// Restore regular ACC settings at 6:00 (morning)
-//0600 acc 80 70 &amp;&amp; acc -s applyOnPlug 2000000; : --boot
-// &quot;: --boot&quot; is optional; it lets this schedule run on boot as well (fail-safe).
+# Restore regular ACC settings at 6:00 (morning)
+#0600 acc pc=75 rc=70 mcc= mcv=; : --boot
+# &quot;: --boot&quot; is optional; it makes this schedule run on boot as well (e.g., as part of a fail-safe plan).
 </div></code></code></pre>
 <hr>
 <h2 id="usage">USAGE</h2>
@@ -230,11 +231,6 @@ Always provide as much information as possible.</p>
 </ul>
 <hr>
 <h2 id="latest-changes">LATEST CHANGES</h2>
-<p><strong>v2021.8.9.1 (202108091)</strong></p>
-<ul>
-<li>Rewritten daemon logic for better efficiency and reliability.</li>
-<li>Updated documentation</li>
-</ul>
 <p><strong>v2021.8.23 (202108230)</strong></p>
 <ul>
 <li>-L|--log [cmd] (default cmd: tail -F), djsd generates verbose (/dev/.vr25/djs/djsd.log).</li>
@@ -246,6 +242,11 @@ Always provide as much information as possible.</p>
 <ul>
 <li>Fixed daemon startup issue.</li>
 <li>Updated framework (it uses acc's) and documentation</li>
+</ul>
+<p><strong>v2021.9.3 (202109030)</strong></p>
+<ul>
+<li>Fixed &quot;boot schedules not working&quot; (thanks, @rhayy)</li>
+<li>Updated config examples</li>
 </ul>
 
     </body>

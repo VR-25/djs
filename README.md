@@ -91,23 +91,24 @@ Other executables or static binaries can also be placed in /data/adb/vr25/bin/ (
 ## CONFIGURATION (/data/adb/vr25/djs-data/config.txt)
 
 ```
-// This is a comment line
+# This is a comment line.
+# All lines that do not match a schedule instruction are ignored, regardless of the '#'.
 
-// This is used to determine whether config should be patched. Do NOT modify!
+# This is used to determine whether this file should be patched. Do NOT modify!
 versionCode=201908180
 
-// Schedule Examples
+# Schedule Examples
 
-// Run on boot
-// boot touch /data/I-was-born-on-boot; : --delete
-// ": --delete" is optional; it means "delete the schedule after execution" - effectively turning it into a one-time boot schedule.
+# Run on boot
+#boot touch /data/I-was-born-on-boot; : --delete
+# ": --delete" is optional; it means "delete the schedule after execution" - effectively turning it into a one-time boot schedule.
 
-// Apply Advanced Charging Controller night settings at 22:00
-//2200 acc 45 44 && acc --set applyOnPlug usb/current_max:500000
+# Apply Advanced Charging Controller night settings at 22:00
+#2200 acc pc=45 rc=44 mcc=500000 mcv=3920
 
-// Restore regular ACC settings at 6:00 (morning)
-//0600 acc 80 70 && acc -s applyOnPlug 2000000; : --boot
-// ": --boot" is optional; it lets this schedule run on boot as well (fail-safe).
+# Restore regular ACC settings at 6:00 (morning)
+#0600 acc pc=75 rc=70 mcc= mcv=; : --boot
+# ": --boot" is optional; it makes this schedule run on boot as well (e.g., as part of a fail-safe plan).
 ```
 
 ---
@@ -242,12 +243,6 @@ Always provide as much information as possible.
 ## LATEST CHANGES
 
 
-**v2021.8.9.1 (202108091)**
-
-- Rewritten daemon logic for better efficiency and reliability.
-- Updated documentation
-
-
 **v2021.8.23 (202108230)**
 
 - -L|--log [cmd] (default cmd: tail -F), djsd generates verbose (/dev/.vr25/djs/djsd.log).
@@ -260,3 +255,9 @@ Always provide as much information as possible.
 
 - Fixed daemon startup issue.
 - Updated framework (it uses acc's) and documentation
+
+
+**v2021.9.3 (202109030)**
+
+- Fixed "boot schedules not working" (thanks, @rhayy)
+- Updated config examples

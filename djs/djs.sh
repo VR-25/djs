@@ -77,7 +77,7 @@ ln -sf $execDir/djs-version.sh /dev/djs-version
 # boot schedules
 if [ ! -f $tmpDir/djsd-boot.sh ]; then
   echo "#!/system/bin/sh" > $tmpDir/djsd-boot.sh
-  grep '^boot | : --boot' $config | sed 's/^.... //' >> $tmpDir/djsd-boot.sh
+  grep -E '^boot | : --boot' $config | sed 's/^.... //' >> $tmpDir/djsd-boot.sh
   echo 'exit $?' >> $tmpDir/djsd-boot.sh
   chmod u+x $tmpDir/djsd-boot.sh
   start-stop-daemon -bx $tmpDir/djsd-boot.sh -S --
