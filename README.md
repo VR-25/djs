@@ -15,9 +15,9 @@
   - [Basics](#basics)
   - [Initializing DJS](#initializing-djs)
 - [FREQUENTLY ASKED QUESTIONS (FAQ)](#frequently-asked-questions-faq)
+- [NOOB-FRIENDLY](#noob-friendly)
 - [LINKS](#links)
 - [LATEST CHANGES](#latest-changes)
-
 
 ---
 ## DESCRIPTION
@@ -226,6 +226,24 @@ Always provide as much information as possible.
 
 `/dev/.vr25/djs/djsd.log`
 
+
+---
+## NOOB FRIENDLY
+
+### Prequisites
+- Magisk Rooted
+- Root File Explorer & Text Editor
+- Your Script to be executed
+- Confidence
+### Steps
+1. Open the config.txt file at /data/adb/vr25/djs-data/
+2. Move to end of the text and create a new line
+3. Start with writing "boot" (without the quotations) if you want the script to executed on boot.
+4. Or Start with writing the time at which you want the script to run in HH:MM format. Ex. "21:30".
+5. Now continue in the same line with a space and paste your script. You're done.
+### Extras
+6. It is possible to Add "; : --delete" to the script if you want the script to run only for first boot.
+7. In case of time based command you can Add "; : --boot" to the script if you want the script to run also at boot.
 
 ---
 ## LINKS
