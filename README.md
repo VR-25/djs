@@ -230,6 +230,7 @@ Always provide as much information as possible.
 ---
 ## LINKS
 
+- [Airtm, username: ivandro863auzqg](https://app.airtm.com/send-or-request/send)
 - [Facebook page](https://facebook.com/VR25-at-xda-developers-258150974794782/)
 - [Git repository](https://github.com/VR-25/djs/)
 - [Liberapay](https://liberapay.com/VR25/)
@@ -242,22 +243,13 @@ Always provide as much information as possible.
 ---
 ## LATEST CHANGES
 
-
-**v2021.8.23 (202108230)**
-
-- -L|--log [cmd] (default cmd: tail -F), djsd generates verbose (/dev/.vr25/djs/djsd.log).
-- General fixes
-- Major optimizations
-- Updated documentation: now with a table of contents and available in HTML format.
-
-
 **v2021.8.26 (202108260)**
-
 - Fixed daemon startup issue.
 - Updated framework (it uses acc's) and documentation
 
-
 **v2021.9.3 (202109030)**
-
 - Fixed "boot schedules not working" (thanks, @rhayy)
 - Updated config examples
+
+**v2021.10.30 (202110300)**
+- General fixes & optimizations

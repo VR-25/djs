@@ -40,22 +40,22 @@ trap exxit EXIT
 [ -x /dev/.vr25/busybox/ls ] || {
   mkdir -p /dev/.vr25/busybox
   chmod 0700 /dev/.vr25/busybox
-  if [ -f /data/adb/vr25/bin/busybox ]; then
-    [ -x /data/adb/vr25/bin/busybox ] || chmod -R 0700 /data/adb/vr25/bin
-    /data/adb/vr25/bin/busybox --install -s /dev/.vr25/busybox
+  if [ -f /data/adb/$domain/bin/busybox ]; then
+    [ -x /data/adb/$domain/bin/busybox ] || chmod -R 0700 /data/adb/$domain/bin
+    /data/adb/$domain/bin/busybox --install -s /dev/.vr25/busybox
   elif [ -f /data/adb/magisk/busybox ]; then
     [ -x /data/adb/magisk/busybox ] || chmod 0700 /data/adb/magisk/busybox
     /data/adb/magisk/busybox --install -s /dev/.vr25/busybox
   elif which busybox > /dev/null; then
     eval "$(which busybox) --install -s /dev/.vr25/busybox"
   else
-    echo "(!) Install busybox or simply place it in /data/adb/vr25/bin/"
+    echo "(!) Install busybox or simply place it in /data/adb/$domain/bin/"
     exit 3
   fi
 }
 case $PATH in
-  /data/adb/vr25/bin:*) :;;
-  *) export PATH=/data/adb/vr25/bin:/dev/.vr25/busybox:$PATH;;
+  /data/adb/$domain/bin:*) :;;
+  *) export PATH=/data/adb/$domain/bin:/dev/.vr25/busybox:$PATH;;
 esac
 #/BB#
 
@@ -72,7 +72,7 @@ get_prop() { sed -n "s|^$1=||p" ${2:-$srcDir/module.prop}; }
 set_perms() {
   local owner=${2:-0}
   local perms=0600
-  local target
+  local target=
   target=$(readlink -f $1)
   if echo $target | grep -q '.*\.sh$' || [ -d $target ]; then perms=0700; fi
   chmod $perms $target
@@ -82,7 +82,7 @@ set_perms() {
 
 set_perms_recursive() {
   local owner=${2-0}
-  local target
+  local target=
   find $1 2>/dev/null | while read target; do set_perms $target $owner; done
 }
 
@@ -93,7 +93,7 @@ set -eu
 srcDir="$(cd "${0%/*}" 2>/dev/null || :; echo "$PWD")"
 
 # extract flashable zip if source code is unavailable
-[ -f $srcDir/module.prop ] || {
+[ -f $srcDir/$id ] || {
   srcDir=/dev/.$domain.${id}-install
   rm -rf $srcDir 2>/dev/null || :
   mkdir $srcDir
@@ -137,9 +137,9 @@ fi
 
 # check/change parent installation directory
 ! $magisk || installDir=$magiskModDir
-[ $installDir != /data/adb/vr25 ] || mkdir -p $installDir
+[ $installDir != /data/adb/$domain ] || mkdir -p $installDir
 [ -d $installDir ] || {
-  installDir=/data/adb/vr25
+  installDir=/data/adb/$domain
   mkdir -p $installDir
 }
 
@@ -213,7 +213,7 @@ fi
 
 
 [ $installDir = /data/adb/$domain/$id ] || {
-  mkdir -p /data/adb/vr25
+  mkdir -p /data/adb/$domain
   ln -s $installDir /data/adb/$domain/
 }
 
@@ -255,8 +255,6 @@ esac
 
 
 set +eu
-
-
 echo "- Done
 
 
