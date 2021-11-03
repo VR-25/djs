@@ -243,13 +243,13 @@ Always provide as much information as possible.
 ---
 ## LATEST CHANGES
 
-**v2021.8.26 (202108260)**
-- Fixed daemon startup issue.
-- Updated framework (it uses acc's) and documentation
-
 **v2021.9.3 (202109030)**
 - Fixed "boot schedules not working" (thanks, @rhayy)
 - Updated config examples
 
 **v2021.10.30 (202110300)**
 - General fixes & optimizations
+
+**v2021.11.3 (202111030)**
+- Fixed installation issues
+- Improved support for the current Magisk canary.
